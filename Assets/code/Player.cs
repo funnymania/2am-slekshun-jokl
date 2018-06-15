@@ -1,8 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-/* RIGHT HAND RULE.
-   ROTATION. */
+
 public class Player : MonoBehaviour {
 	#region Declarations
 	public enum CharacterState {
@@ -278,310 +277,401 @@ public class Player : MonoBehaviour {
 	int coinflip;
 	float distCounter=0;
 	#endregion
-	void Start() {
-		particle=GameObject.Find("Player/stuff/sprite&controller/beefstrap 1");
-		particle2=GameObject.Find("Player/stuff/sprite&controller/beefstrap (1)");
-		/*particle.SetActive(false);
-		particle2.SetActive(false);*/
-		breathing=Breath.GetComponent<ParticleSystem>();
-		interestingStuff=null;
-		enemyInfo.health=100;
-		tr=turnTranny;spriteLocale=tr.parent;
+	
+    void Start () {
+		particle = GameObject.Find("Player/stuff/sprite&controller/beefstrap 1");
+		particle2 = GameObject.Find("Player/stuff/sprite&controller/beefstrap (1)");
+		breathing = Breath.GetComponent<ParticleSystem>();
+		interestingStuff = null;
+		enemyInfo.health = 100;
+		tr = turnTranny;
+        spriteLocale = tr.parent;
 		//meshan=GetComponent<Animator>();
-		downwardsLast=new Vector3(0,1,0);
-		timer=0;
+		downwardsLast = new Vector3(0,1,0);
+		timer = 0;
 		meshan.Play("idleLeft");
-		playersWill=Vector3.zero;
-		rootPast=tr.position;
-		body=new RaycastHit[8];
-		endurVelocity=20;
-		chance=Random.Range(2,6)*2.667F;
-		idleState=0;skidRotor=0;
-		camRotor=camRotation.eulerAngles.y*Mathf.PI/180;
-		Application.targetFrameRate=60;
-		camOffsetPast=spriteCont.position;
-		orientVec=new Vector3(0,1,0);
+		playersWill = Vector3.zero;
+		rootPast = tr.position;
+		body = new RaycastHit[8];
+		endurVelocity = 20;
+		chance = Random.Range(2,6) * 2.667F;
+		idleState = 0;
+        skidRotor = 0;
+		camRotor = camRotation.eulerAngles.y * Mathf.PI / 180;
+		Application.targetFrameRate = 60;
+		camOffsetPast = spriteCont.position;
+		orientVec = new Vector3(0,1,0);
 		//Screen.fullScreen=true;
 	}
-	/* so here's how movement works out: if you move in one quadrant direction, it is like now, except with a slow fade to trans
-		on initial stance, and a slow fade INTO opaque on next stance. else (quadrant change), initial stance fades a lot faster,
-		 and next stance is projected and also fades INTO opaq faster . */
-	void FixedUpdate(){
-		timey=Time.deltaTime;
-		downwards=new RaycastHit();ledge=new RaycastHit();ledgey=new RaycastHit();
-		slopewards=new RaycastHit();
-		distNear=1;
-		for(i=0;i<4;i++){ //preference to top chains. sided. if multiple contact points, draw a line between those affected areas
-					// && and impose this as the surface
-			for(j=0;j<3;j++){
-				chain[i,j]=new RaycastHit();}}
+
+	void FixedUpdate () {
+		timey = Time.deltaTime;
+		downwards = new RaycastHit();
+        ledge = new RaycastHit();
+        ledgey = new RaycastHit();
+		slopewards = new RaycastHit();
+		distNear = 1;
+
+        // Preference to top chains. Sided. if multiple contact points, draw a line between those affected areas
+		// && and impose this as the surface
+        for (i = 0; i < 4; i++) { 
+			for (j = 0; j < 3; j++) {
+				chain[i,j] = new RaycastHit();
+            }
+        }
 		cols.Clear();
-		camOffset=spriteCont.position-camOffsetPast;
-		//Debug.DrawRay(tr.position,downwardsLast*-2); //when vertic and horiz both non-zero && (2 different surfaces || )
+		camOffset = spriteCont.position - camOffsetPast;
+		// Debug.DrawRay(tr.position,downwardsLast*-2);
+
 	#region colliderStuff
 		// chain forward
-			isHit=Physics.Raycast(chain1.position,chain1.forward,out chain[0,0],.3F,~0,QueryTriggerInteraction.Ignore);
-			//Debug.DrawRay(chain1.position,chain1.forward*2);
-			if(isHit){
-				distNear=chain[0,0].distance;
-				collision me=new collision(chain[0,0].distance,chain[0,0].normal,chain1.forward*chain[0,0].distance);
-				cols.Add(me);isHit=false;}
-			isHit=Physics.Raycast(chainMID.position,chainMID.forward,out chain[0,1],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit && chain[0,1].distance<distNear){
-				if(cols.Count!=0) cols.RemoveAt(cols.Count-1);
-				distNear=chain[0,1].distance;
-				collision me=new collision(chain[0,1].distance,chain[0,1].normal,chainMID.forward*chain[0,1].distance);
-				cols.Add(me);isHit=false;}
-			isHit=Physics.Raycast(chain2.position,chain2.forward,out chain[0,2],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit && chain[0,2].distance<distNear){
-				if(cols.Count!=0) cols.RemoveAt(cols.Count-1);
-				distNear=chain[0,2].distance;
-				collision me=new collision(chain[0,2].distance,chain[0,2].normal,chain2.forward*chain[0,2].distance);
-				cols.Add(me);isHit=false;}
+			isHit = Physics.Raycast(chain1.position, chain1.forward, out chain[0,0], .3F, ~0, QueryTriggerInteraction.Ignore);
+			// Debug.DrawRay(chain1.position,chain1.forward*2);
+			if (isHit) {
+				distNear = chain[0,0].distance;
+				collision me = new collision(chain[0,0].distance, chain[0,0].normal, chain1.forward * chain[0,0].distance);
+				cols.Add(me);
+                isHit = false;
+            }
+			isHit = Physics.Raycast(chainMID.position, chainMID.forward, out chain[0,1], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit && chain[0,1].distance < distNear) {
+				if (cols.Count != 0) {
+                    cols.RemoveAt(cols.Count - 1);
+                }
+				distNear = chain[0,1].distance;
+				collision me = new collision(chain[0,1].distance, chain[0,1].normal, chainMID.forward * chain[0,1].distance);
+				cols.Add(me);
+                isHit = false;
+            }
+			isHit = Physics.Raycast(chain2.position, chain2.forward, out chain[0,2], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit && chain[0,2].distance < distNear) {
+				if (cols.Count != 0) {
+                    cols.RemoveAt(cols.Count - 1);
+                }
+				distNear = chain[0,2].distance;
+				collision me = new collision(chain[0,2].distance, chain[0,2].normal, chain2.forward * chain[0,2].distance);
+				cols.Add(me);
+                isHit = false;
+            }
 		// chain forward * -1
-			isHit=Physics.Raycast(chain1.position,chain1.forward*-1,out chain[1,0],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit){
-				distNear=chain[1,0].distance;
-				collision me=new collision(chain[1,0].distance,chain[1,0].normal,chain1.forward*-1*chain[1,0].distance);
-				cols.Add(me);isHit=false;}
-			isHit=Physics.Raycast(chainMID.position,chainMID.forward*-1,out chain[1,1],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit && chain[1,1].distance<distNear){
-				if(cols.Count!=0) cols.RemoveAt(cols.Count-1);
-				distNear=chain[1,1].distance;
-				collision me=new collision(chain[1,1].distance,chain[1,1].normal,chainMID.forward*-1*chain[1,1].distance);
-				cols.Add(me);isHit=false;}
-			isHit=Physics.Raycast(chain2.position,chain2.forward*-1,out chain[1,2],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit && chain[1,2].distance<distNear){
-				if(cols.Count!=0) cols.RemoveAt(cols.Count-1);
-				distNear=chain[1,2].distance;
-				collision me=new collision(chain[1,2].distance,chain[1,2].normal,chain2.forward*-1*chain[1,2].distance);
-				cols.Add(me);isHit=false;}
+			isHit = Physics.Raycast(chain1.position, chain1.forward * -1, out chain[1,0], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit) {
+				distNear = chain[1,0].distance;
+				collision me = new collision(chain[1,0].distance, chain[1,0].normal, chain1.forward * -1 * chain[1,0].distance);
+				cols.Add(me);
+                isHit = false;
+            }
+			isHit = Physics.Raycast(chainMID.position, chainMID.forward * -1, out chain[1,1], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit && chain[1,1].distance < distNear) {
+				if (cols.Count!=0) {
+                    cols.RemoveAt(cols.Count - 1);
+                }
+                distNear = chain[1,1].distance;
+				collision me = new collision(chain[1,1].distance, chain[1,1].normal, chainMID.forward * -1 * chain[1,1].distance);
+				cols.Add(me);
+                isHit = false;
+            }
+			isHit = Physics.Raycast(chain2.position, chain2.forward * -1, out chain[1,2], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit && chain[1,2].distance < distNear) {
+				if (cols.Count != 0) {
+                    cols.RemoveAt(cols.Count - 1);
+                }
+                distNear = chain[1,2].distance;
+				collision me = new collision(chain[1,2].distance, chain[1,2].normal, chain2.forward * -1 * chain[1,2].distance);
+				cols.Add(me);
+                isHit = false;
+            }
 		// chain right
-			isHit=Physics.Raycast(chain1.position,chain1.right,out chain[2,0],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit){
-				distNear=chain[2,0].distance;
-				collision me=new collision(chain[2,0].distance,chain[2,0].normal,chain1.right*chain[2,0].distance);
-				cols.Add(me);isHit=false;}
-			isHit=Physics.Raycast(chainMID.position,chainMID.right,out chain[2,1],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit && chain[2,1].distance<distNear){
-				if(cols.Count!=0) cols.RemoveAt(cols.Count-1);
-				distNear=chain[2,1].distance;
-				collision me=new collision(chain[2,1].distance,chain[2,1].normal,chainMID.right*chain[2,1].distance);
-				cols.Add(me);isHit=false;}
-			isHit=Physics.Raycast(chain2.position,chain2.right,out chain[2,2],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit && chain[2,2].distance<distNear){
-				if(cols.Count!=0) cols.RemoveAt(cols.Count-1);
-				distNear=chain[2,2].distance;
-				collision me=new collision(chain[2,2].distance,chain[2,2].normal,chain2.right*chain[2,2].distance);
-				cols.Add(me);isHit=false;}
+			isHit = Physics.Raycast(chain1.position, chain1.right, out chain[2,0], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit) {
+				distNear = chain[2,0].distance;
+				collision me = new collision(chain[2,0].distance, chain[2,0].normal, chain1.right * chain[2,0].distance);
+				cols.Add(me);
+                isHit = false;
+            }
+			isHit = Physics.Raycast(chainMID.position, chainMID.right, out chain[2,1], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit && chain[2,1].distance < distNear) {
+				if (cols.Count != 0) {
+                    cols.RemoveAt(cols.Count - 1);
+                }
+                distNear = chain[2,1].distance;
+				collision me = new collision(chain[2,1].distance, chain[2,1].normal, chainMID.right * chain[2,1].distance);
+				cols.Add(me);
+                isHit = false;
+            }
+			isHit = Physics.Raycast(chain2.position, chain2.right, out chain[2,2], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit && chain[2,2].distance < distNear) {
+				if (cols.Count != 0) {
+                    cols.RemoveAt(cols.Count - 1);
+                }
+                distNear = chain[2,2].distance;
+				collision me = new collision(chain[2,2].distance, chain[2,2].normal, chain2.right * chain[2,2].distance);
+				cols.Add(me);
+                isHit = false;
+            }
 		// chain right * -1
-			isHit=Physics.Raycast(chain1.position,chain1.right*-1,out chain[3,0],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit){
-				distNear=chain[3,0].distance;
-				collision me=new collision(chain[3,0].distance,chain[3,0].normal,chain1.right*-1*chain[3,0].distance);
-				cols.Add(me);isHit=false;}
-			isHit=Physics.Raycast(chainMID.position,chainMID.right*-1,out chain[3,1],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit && chain[3,1].distance<distNear){
-				if(cols.Count!=0) cols.RemoveAt(cols.Count-1);
-				distNear=chain[3,1].distance;
-				collision me=new collision(chain[3,1].distance,chain[3,1].normal,chainMID.right*-1*chain[3,1].distance);
-				cols.Add(me);isHit=false;}
-			isHit=Physics.Raycast(chain2.position,chain2.right*-1,out chain[3,2],.3F,~0,QueryTriggerInteraction.Ignore);
-			if(isHit&& chain[3,2].distance<distNear){
-				if(cols.Count!=0) cols.RemoveAt(cols.Count-1);
-				distNear=chain[3,2].distance;
-				collision me=new collision(chain[3,2].distance,chain[3,2].normal,chain2.right*-1*chain[3,2].distance);
-				cols.Add(me);isHit=false;}
+			isHit = Physics.Raycast(chain1.position, chain1.right * -1, out chain[3,0], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit) {
+				distNear = chain[3,0].distance;
+				collision me = new collision(chain[3,0].distance, chain[3,0].normal, chain1.right * -1 * chain[3,0].distance);
+				cols.Add(me);
+                isHit = false;
+            }
+			isHit = Physics.Raycast(chainMID.position, chainMID.right * -1, out chain[3,1], .3F, ~0, QueryTriggerInteraction.Ignore);
+			if (isHit && chain[3,1].distance < distNear) {
+				if (cols.Count != 0) {
+                    cols.RemoveAt(cols.Count - 1);
+                }
+                distNear = chain[3,1].distance;
+				collision me = new collision(chain[3,1].distance, chain[3,1].normal, chainMID.right * -1 * chain[3,1].distance);
+				cols.Add(me);
+                isHit = false;
+            }
+			isHit = Physics.Raycast(chain2.position, chain2.right * -1, out chain[3,2], .3F ,~0, QueryTriggerInteraction.Ignore);
+			if (isHit && chain[3,2].distance < distNear) {
+				if (cols.Count != 0) {
+                    cols.RemoveAt(cols.Count - 1);
+                }
+                distNear = chain[3,2].distance;
+				collision me = new collision(chain[3,2].distance, chain[3,2].normal, chain2.right * -1 * chain[3,2].distance);
+				cols.Add(me);
+                isHit = false;
+            }
 		// down
-			straightDown=Physics.Raycast(chainMID.position,chainMID.up*-1,out downwards,.74F,~0,QueryTriggerInteraction.Ignore);
-			Debug.DrawRay(chainMID.position,chainMID.up*-1);
+			straightDown = Physics.Raycast(chainMID.position, chainMID.up * -1, out downwards, .74F, ~0, QueryTriggerInteraction.Ignore);
+			Debug.DrawRay(chainMID.position, chainMID.up * -1);
 		// correction
-			slopeCorrect=Physics.Raycast(chainMID.position,chainMID.up*-1,out slopewards,2,~0,QueryTriggerInteraction.Ignore);
+			slopeCorrect = Physics.Raycast(chainMID.position, chainMID.up * -1, out slopewards, 2, ~0, QueryTriggerInteraction.Ignore);
 		// logic
 			//downwardsLast*-1
 		/* if only one raycast detects, move according to its normal
 			if >1, find the 2 nearest and impose a line between them. move according to this.
 				capsule for fencil and opponent ; impactPriority will determine who moves through who*/
 #endregion
-		if(downwardsLast.y<=0.1F) Debug.Log(downwards.transform.name);
-		if(!slopeCorrect){
-			downwardsLast=new Vector3(0,1,0);}
-		if(!noMovement){
-			if(straightDown || (slopeCorrect && !isFalling)){camOffsetPast=spriteCont.position;
-				if(isFalling){ // dust particle here!
-					accel=Vector3.zero;velocity=Vector3.zero;camOffsetPast=spriteCont.position;leaping=false;
-					isFalling=false;isGround=true;downwardsLast=downwards.normal;
-					if(gameStart){
+		if (downwardsLast.y <= 0.1F) Debug.Log(downwards.transform.name);
+		if (!slopeCorrect) {
+			downwardsLast = new Vector3(0,1,0);
+        }
+		if (!noMovement) {
+			if (straightDown || (slopeCorrect && !isFalling)) {
+                camOffsetPast = spriteCont.position;
+				if (isFalling) { // dust particle here!
+					accel = Vector3.zero;
+                    velocity = Vector3.zero;
+                    camOffsetPast = spriteCont.position;
+                    leaping = false;
+					isFalling = false;
+                    isGround = true;
+                    downwardsLast = downwards.normal;
+					if (gameStart) {
 						//particle.SetActive(true);particle2.SetActive(true);GetComponent<AudioSource>().PlayOneShot(Spawn,0.125F);
-						gameStart=false;}}
-				else
-				{	if(vertic==-1 && canDown)
-						goingDown=true;
-					if(dialogFlag);
-					else if(straightDown){
-						downDistanceLast=downwards.distance;
-						if(downwards.transform.tag=="floor"){
-							if(downwardsLast!=downwards.normal){
-								downwardsLast=downwards.normal;
-								Quaternion dummyRotation=Quaternion.FromToRotation(spriteCont.up,downwards.normal);
-								spriteCont.eulerAngles=new Vector3(dummyRotation.eulerAngles.x,dummyRotation.eulerAngles.y,spriteCont.eulerAngles.z);
-							}}
-						if(downDistanceLast<.64F){
-							spriteCont.position+=new Vector3(0,.71F-downDistanceLast,0);}
-						orientVec=downwards.normal*-1;
-						if(explode){
+						gameStart = false;
+                    }
+                } else {	
+                    if (vertic == -1 && canDown)
+						goingDown = true;
+					if (dialogFlag)
+                        ;
+					else if (straightDown) {
+						downDistanceLast = downwards.distance;
+						if (downwards.transform.tag == "floor"){
+							if (downwardsLast != downwards.normal) {
+								downwardsLast = downwards.normal;
+								Quaternion dummyRotation = Quaternion.FromToRotation(spriteCont.up, downwards.normal);
+								spriteCont.eulerAngles = new Vector3(dummyRotation.eulerAngles.x, dummyRotation.eulerAngles.y, spriteCont.eulerAngles.z);
+							}
+                        }
+						if (downDistanceLast < .64F) {
+							spriteCont.position += new Vector3(0, .71F - downDistanceLast, 0);
+                        }
+						orientVec = downwards.normal * -1;
+						if (explode) {
 							framesExplode++;
-							if(explode2){
-								accel=slope*800;
-								velocity+=accel*Time.deltaTime;
-								moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-								spriteCont.position+=moveDirection;
-								explode2=false;}
-							else
-							{	if(framesExplode>30){
-									explode2=true;
-									dashing=true;
-									explode=false;framesExplode=0;}
-								else
-								{	accel=slope*-30;
-									velocity+=accel*Time.deltaTime;
-									moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-									spriteCont.position+=moveDirection;;}}}
-						else if(horiz==1 || vertic==1 || horiz==-1 || vertic==-1){
-							if(moveDirection.sqrMagnitude<=.02 && framesDashing!=0) spriteCont.position+=blahBlah;
-							Vector3 garage=new Vector3(turnTranny.forward.x,0,turnTranny.forward.z);
-							slope=Vector3.Cross(Vector3.Cross(downwards.normal,garage),downwards.normal);
-							slope=slope.normalized;Debug.Log(cols.Count);
-							if(cols.Count==1){
-								genNormal=cols[0].normal;
-								slope=(genNormal+slope).normalized;}
-							else if(cols.Count>1){
-								Vector3 side1=cols[1].contactPt-cols[0].contactPt;
-								Vector3 tmp=new Vector3(cols[1].contactPt.x,cols[1].contactPt.y-1,cols[1].contactPt.z);
-								Vector3 side2=tmp-cols[0].contactPt;
-								genNormal=Vector3.Cross(side2,side1);
-								genNormal=genNormal.normalized;
-								Debug.DrawRay(chainMID.position,genNormal*5F,Color.white,.5F);
+							if (explode2) {
+								accel = slope * 800;
+								velocity += accel * Time.deltaTime;
+								moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+								spriteCont.position += moveDirection;
+								explode2 = false;
+                            } else {	
+                                if (framesExplode > 30) {
+									explode2 = true;
+									dashing = true;
+									explode = false;
+                                    framesExplode = 0;
+                                } else {	
+                                    accel = slope * -30;
+									velocity += accel * Time.deltaTime;
+									moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+									spriteCont.position += moveDirection;
+                                }
+                            }
+                        } else if (horiz == 1 || vertic == 1 || horiz == -1 || vertic == -1) {
+							if (moveDirection.sqrMagnitude <= .02 && framesDashing != 0) {
+                                spriteCont.position += blahBlah;
+                            }
+							Vector3 garage = new Vector3(turnTranny.forward.x, 0, turnTranny.forward.z);
+							slope = Vector3.Cross(Vector3.Cross(downwards.normal, garage), downwards.normal);
+							slope = slope.normalized;
+                            Debug.Log(cols.Count);
+							if (cols.Count == 1) {
+								genNormal = cols[0].normal;
+								slope = (genNormal + slope).normalized;
+                            } else if (cols.Count > 1) {
+								Vector3 side1 = cols[1].contactPt - cols[0].contactPt;
+								Vector3 tmp = new Vector3(cols[1].contactPt.x, cols[1].contactPt.y - 1, cols[1].contactPt.z);
+								Vector3 side2 = tmp - cols[0].contactPt;
+								genNormal = Vector3.Cross(side2, side1);
+								genNormal = genNormal.normalized;
+								Debug.DrawRay(chainMID.position, genNormal * 5F, Color.white, .5F);
 								//Debug.Break();
-								slope=(genNormal-slope).normalized;}
-							if(!dashing){
-								dashing=true;
-								accel=slope*303; //4169
-								velocity+=accel*Time.deltaTime;
-								moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-								spriteCont.position+=moveDirection;}
-							else
-							{	accel=Vector3.zero;
-								moveDirection=velocity.magnitude*slope*Time.deltaTime;
-								spriteCont.position+=moveDirection;}
-							framesDashing++;}
-						else if(vertic==0 && horiz==0){
-							if(moveDirection.sqrMagnitude<=.02F){
-								accel=Vector3.zero;velocity=Vector3.zero;dashing=false;}
-							else
-							{	accel=slope*-20;
-								velocity+=accel*Time.deltaTime;
-								moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-								spriteCont.position+=moveDirection;;dashing=false;
-								framesDashing=0;}}}
-					else
-					{	if(slopewards.transform.parent.name=="linees") onLine=true;
-						else onLine=false;
-						downDistanceLast=slopewards.distance;//Debug.Log("slope");
-						//slope=Vector3.Cross(Vector3.Cross(slopewards.normal,camOffset),slopewards.normal);
-						if(slopewards.distance>.74F){
-							slope.y=slopewards.distance-0.73F;
-							//me.Move(new Vector3(0,slope.y*-1,0));
-							spriteCont.position+=new Vector3(0,slope.y*-1,0);
-							Debug.Log("whoaNow "+slope.y);}
-						if(explode){
-							if(explode2){
-								accel=slope*800;
-								velocity+=accel*Time.deltaTime;
-								moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-								spriteCont.position+=moveDirection;;
-								explode2=false;}
-							else
-							{	if(moveDirection.sqrMagnitude<.13){
-									explode2=true;
-									explode=false;}
-								else
-								{	accel=slope*-20;
-									velocity+=accel*Time.deltaTime;
-									moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-									spriteCont.position+=moveDirection;;dashing=false;}}}
-						else if(horiz==1 || vertic==1 || horiz==-1 || vertic==-1){
-							if(moveDirection.sqrMagnitude<=.02 && framesDashing!=0) spriteCont.position+=blahBlah;
-							Vector3 garage=new Vector3(turnTranny.forward.x,0,turnTranny.forward.z);
-							slope=Vector3.Cross(Vector3.Cross(slopewards.normal,garage),downwards.normal);
-							slope=slope.normalized;
-							if(cols.Count==1){
-								genNormal=cols[0].normal;
-								slope=(genNormal+slope).normalized;}
-							else if(cols.Count>1){
-								Vector3 side1=cols[1].contactPt-cols[0].contactPt;
-								Vector3 tmp=new Vector3(cols[1].contactPt.x,cols[1].contactPt.y-1,cols[1].contactPt.z);
-								Vector3 side2=tmp-cols[0].contactPt;
-								genNormal=Vector3.Cross(side2,side1);
-								genNormal=genNormal.normalized;
-								//Debug.DrawRay(chainMID.position,slope*5F,Color.white,19);
-								//Debug.Break();
-								slope=(genNormal-slope).normalized;}
-							if(!dashing){
-								dashing=true;
-								accel=slope*270;
-								velocity+=accel*Time.deltaTime;
-								moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-								spriteCont.position+=moveDirection;}
-							else
-							{	accel=Vector3.zero;
-								moveDirection=velocity.magnitude*slope*Time.deltaTime;
-								spriteCont.position+=moveDirection;;}}
-						else if(vertic==0 && horiz==0){
-							if(moveDirection.sqrMagnitude<=.02F){
-								accel=Vector3.zero;velocity=Vector3.zero;dashing=false;}
-							else
-							{	accel=slope*-20;
-								velocity+=accel*Time.deltaTime;
-								moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-								spriteCont.position+=moveDirection;dashing=false;}}
-						if(slopewards.transform.tag=="floor"){
-							if(!Lshift){
-								downwardsLast=slopewards.normal;
-								//tr.position-=new Vector3(0,slope.y,0);
-								/*spriteCont.rotation=Quaternion.FromToRotation(spriteCont.up,slopewards.normal);*/}
-							else
-							{	if(!kontakt) me.Move(new Vector3(0,0,slope.z));
-								else tr.position+=new Vector3(0,0,slope.z);}}}}
-			}
-			else if(charState!=CharacterState.Ledge && charState!=CharacterState.Climb)
-			{	/*if(Physics.Raycast(turnTranny.position,orientVec*.04F,out ledgey,bellamy*tinyDude) && ledgey.transform.parent.name=="Ledges"){
-					ledgeNearby=true;ledgeType=ledgey.transform.tag;}
-				else ledgeNearby=false;Debug.Log("hjk");*/
-				//surface=new Vector3(moveDirection.x,0,moveDirection.z)*-SQ*velocity.magnitude/4;  Air Resistance
-				/*onCloud=false;onCloud4real=false;*/onMoving=false;
-				/*if(charState==CharacterState.Strafe)
-					accel=new Vector3(0,-10,0)+surface;*/
-				camOffsetPast=spriteCont.position;
-				if(!Lshift) //Must be moving y-down RELATIVE to normal axis.
-				{	accel=downwardsLast*-3.1F;
-					velocity+=accel*Time.deltaTime;
-					moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-					spriteCont.position+=moveDirection;;}
-				else
-				{	accel=downwardsLast*-3.1F;
-					velocity+=accel*Time.deltaTime;
-					moveDirection=(accel/2*Time.deltaTime+velocity)*Time.deltaTime;
-					moveDirection*=tinyDude;
-					spriteCont.position+=moveDirection;;}
-				isFalling=true;
-				rootOffset=tr.position-rootPast;
-				rootPast=tr.position;
+								slope= (genNormal - slope).normalized;
+                            }
+							if (!dashing) {
+								dashing = true;
+								accel = slope * 303; //4169
+								velocity += accel * Time.deltaTime;
+								moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+								spriteCont.position += moveDirection;
+                            } else {	
+                                accel = Vector3.zero;
+								moveDirection = velocity.magnitude * slope * Time.deltaTime;
+								spriteCont.position += moveDirection;
+                            }
+							framesDashing++;
+                        } else if (vertic == 0 && horiz == 0) {
+							if (moveDirection.sqrMagnitude <=. 02F) {
+								accel = Vector3.zero;
+                                velocity=Vector3.zero;
+                                dashing = false;
+                            } else {	
+                                accel = slope * -20;
+								velocity += accel * Time.deltaTime;
+								moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+								spriteCont.position += moveDirection;
+                                dashing = false;
+								framesDashing = 0;
+                            }
+                        }
+                    } else {	
+                        if (slopewards.transform.parent.name == "linees") {
+                            onLine = true;
+                        } else {
+                            onLine = false;
+                        }
+						downDistanceLast = slopewards.distance;
+                        // Debug.Log("slope");
+						// slope=Vector3.Cross(Vector3.Cross(slopewards.normal,camOffset),slopewards.normal);
+						if (slopewards.distance > .74F) {
+							slope.y = slopewards.distance - 0.73F;
+							// me.Move(new Vector3(0,slope.y*-1,0));
+							spriteCont.position += new Vector3(0, slope.y * -1, 0);
+							Debug.Log("whoaNow " + slope.y);
+                        }
+						if (explode) {
+							if (explode2) {
+								accel = slope * 800;
+								velocity += accel * Time.deltaTime;
+								moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+								spriteCont.position += moveDirection;
+								explode2=false;
+                            } else {	
+                                if (moveDirection.sqrMagnitude < .13) {
+									explode2 = true;
+									explode = false;
+                                } else {	
+                                    accel = slope * -20;
+									velocity += accel * Time.deltaTime;
+									moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+									spriteCont.position += moveDirection;
+                                    dashing = false;
+                                }
+                            }
+                        } else if (horiz == 1 || vertic == 1 || horiz == -1 || vertic == -1) {
+							if (moveDirection.sqrMagnitude <= .02 && framesDashing != 0) {
+                                spriteCont.position += blahBlah;
+                            }
+                            Vector3 garage = new Vector3(turnTranny.forward.x, 0, turnTranny.forward.z);
+							slope = Vector3.Cross(Vector3.Cross(slopewards.normal, garage), downwards.normal);
+							slope = slope.normalized;
+							if (cols.Count == 1) {
+								genNormal = cols[0].normal;
+								slope = (genNormal + slope).normalized;
+                            } else if (cols.Count > 1) {
+								Vector3 side1 = cols[1].contactPt - cols[0].contactPt;
+								Vector3 tmp = new Vector3(cols[1].contactPt.x, cols[1].contactPt.y - 1, cols[1].contactPt.z);
+								Vector3 side2 = tmp - cols[0].contactPt;
+								genNormal = Vector3.Cross(side2, side1);
+								genNormal = genNormal.normalized;
+								// Debug.DrawRay(chainMID.position,slope*5F,Color.white,19);
+								// Debug.Break();
+								slope= (genNormal - slope).normalized;
+                            }
+							if (!dashing) {
+								dashing = true;
+								accel = slope * 270;
+								velocity += accel * Time.deltaTime;
+								moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+								spriteCont.position += moveDirection;
+                            } else {	
+                                accel = Vector3.zero;
+								moveDirection = velocity.magnitude * slope * Time.deltaTime;
+								spriteCont.position += moveDirection;
+                            }
+                        } else if (vertic == 0 && horiz == 0) {
+							if (moveDirection.sqrMagnitude <= .02F) {
+								accel = Vector3.zero;
+                                velocity = Vector3.zero;
+                                dashing = false;
+                            } else {	
+                                accel = slope * -20;
+								velocity += accel * Time.deltaTime;
+								moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+								spriteCont.position += moveDirection;
+                                dashing = false;
+                            }
+                        }
+						if (slopewards.transform.tag == "floor") {
+							if (!Lshift) {
+								downwardsLast = slopewards.normal;
+								// tr.position-=new Vector3(0,slope.y,0);
+								// spriteCont.rotation=Quaternion.FromToRotation(spriteCont.up,slopewards.normal);
+                            } else {	
+                                if (!kontakt) 
+                                    me.Move(new Vector3(0, 0, slope.z));
+								else 
+                                    tr.position += new Vector3(0, 0, slope.z);
+                            }
+                        }
+                    }
+                }
+			} else if (charState != CharacterState.Ledge && charState != CharacterState.Climb) {	
+				onMoving = false;
+                camOffsetPast = spriteCont.position;
+				if (!Lshift) { // Must be moving y-down RELATIVE to normal axis.
+					accel = downwardsLast * -3.1F;
+					velocity += accel * Time.deltaTime;
+					moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+					spriteCont.position += moveDirection;
+                } else {	
+                    accel = downwardsLast * -3.1F;
+					velocity += accel * Time.deltaTime;
+					moveDirection = (accel / 2 * Time.deltaTime + velocity) * Time.deltaTime;
+					moveDirection *= tinyDude;
+					spriteCont.position += moveDirection;
+                }
+				isFalling = true;
+				rootOffset = tr.position - rootPast;
+				rootPast = tr.position;
 				/*if(!Lshift) orientVec=new Vector3(0,-1,0);
-				else orientVec=new Vector3(0,0,1);*/}
-			else camOffsetPast=spriteCont.position;}
+				else orientVec=new Vector3(0,0,1);*/
+            } else {
+                camOffsetPast=spriteCont.position;
+            }
+        }
 	}
-    void Update(){
+
+    void Update () {
 		if(!EventHandler.eventFlag){
 			timey=Time.deltaTime;horiz=Input.GetAxis("Horizontal");vertic=Input.GetAxis("Vertical");
 			horiz2=Input.GetAxis("Horizontal2");vertic2=Input.GetAxis("Vertical2");
