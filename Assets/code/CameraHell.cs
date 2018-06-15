@@ -2,25 +2,24 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-// PROBLEMS: Do Luya collision.. also up/down camera
-
 // Ideas: 	 Have a slow/medium way the camera "switches" to look at things (hallucinations).
 //           AND a faster one for NPC interactions. Way in which camera & character movements behave act the same in either,
 //			 with the exception of speed.
-
 //			 Targeting should be towards "important part" of enemies (not always their feet :\)
 //			 Right Analog jerks switch targets
-/*			 A common use for LateUpdate would be a following third-person camera. 
-			 If you make your character move and turn inside Update, you can perform all camera movement and rotation calculations in LateUpdate. 
-			 This will ensure that the character has moved completely before the camera tracks its position.*/
-//			eulerAngles.x to be NOT greater than +/- 67
+//           A common use for LateUpdate would be a following third-person camera. 
+// 			 If you make your character move and turn inside Update, you can perform all camera movement and rotation calculations in LateUpdate. 
+// 			 This will ensure that the character has moved completely before the camera tracks its position.
+//			 eulerAngles.x to be NOT greater than +/- 67
 
 public class CameraHell : MonoBehaviour {
+
+#region Declarations
 	public static Transform target;
 	public static Transform tr;
 	public static Transform sceneCam;
 	public static bool eventFlag = false;
-	public static float sizeFactor=1;
+	public static float sizeFactor = 1;
 	public static Vector3 a;
 	public float distance;
 	GameObject yada;
@@ -33,7 +32,7 @@ public class CameraHell : MonoBehaviour {
 	Vector3 final;
 	Vector3 posPast;
 	Vector3 offset;
-	Vector3 oldDist,current;
+	Vector3 oldDist, current;
 	float maxTranslate;
 	float amt;
 	float timer;
@@ -42,51 +41,59 @@ public class CameraHell : MonoBehaviour {
 	int i;
 	public bool entrance = false;
 	public bool arranging = false;
-	bool firstMode=false;
-	public static bool isTiny =false;
+	bool firstMode = false;
+	public static bool isTiny = false;
 	public Transform enemy;
 	List <Transform> enemies;
 	Transform targetedEnemy;
 	RaycastHit left;
-	RaycastHit right,up,down,back;
+	RaycastHit right, up, down, back;
+#endregion
 	
-
-	void Start () {
+    void Start ()
+    {
 		camera = GetComponent<Camera>();
 		//if(!SaveState.startScreen){
-			tr=transform;offset=Vector3.zero;
-			yada=GameObject.FindWithTag("Player");
-			target=yada.transform;
-			if(!CameraTitleScreen.isitCool){
-				CameraTitleScreen.isitCool=true;}
-			if(!firstMode){
-				tr.position=new Vector3(target.position.x,target.position.y,target.position.z-distance);
+			tr = transform;
+            offset = Vector3.zero;
+			yada = GameObject.FindWithTag("Player");
+			target = yada.transform;
+			if (!CameraTitleScreen.isitCool) {
+				CameraTitleScreen.isitCool = true;
+            }
+			if (!firstMode) {
+				tr.position = new Vector3(target.position.x, target.position.y, target.position.z - distance);
 				tr.LookAt(target);
-				tr.position+=new Vector3(0,4.5F,0);}
-			else
-				tr.position=new Vector3(target.position.x+0.35F,target.position.y+3.4F,target.position.z);
-			a=target.position;
-			c=Vector3.zero;
-			maxTranslate=(float)2*Mathf.Sin(59)*distance;
-			enemies=new List<Transform>();
+				tr.position += new Vector3(0, 4.5F, 0);
+            } else {
+                tr.position = new Vector3(target.position.x + 0.35F, target.position.y + 3.4F, target.position.z);
+            }
+			a = target.position;
+			c = Vector3.zero;
+			maxTranslate = (float) 2 * Mathf.Sin(59) * distance;
+			enemies = new List<Transform>();
 	}
 	
-	void FixedUpdate(){ posPast=tr.position;
-		if(!eventFlag){
-			if(!SaveState.startScreen){
-				if(!firstMode && !Player.startFlag){
-					if(!entrance){
-							entrance=true;
-							enemies.Clear();}
-
-					posPast=tr.position;
-					tr.position+=Player.camOffset;
-					if(tr.localEulerAngles.x<270 && tr.localEulerAngles.x>50 && vertic>0)
+	void FixedUpdate ()
+    { 
+        posPast = tr.position;
+		if (!eventFlag) {
+			if (!SaveState.startScreen) {
+				if (!firstMode && !Player.startFlag) {
+					if (!entrance) {
+                        entrance = true;
+                        enemies.Clear();
+                    }
+					
+                    posPast = tr.position;
+					tr.position += Player.camOffset;
+					
+                    if (tr.localEulerAngles.x < 270 && tr.localEulerAngles.x > 50 && vertic > 0)
 						vertic=0;
-					if(tr.localEulerAngles.x>270 && tr.localEulerAngles.x<314 && vertic<0)
+					if (tr.localEulerAngles.x > 270 && tr.localEulerAngles.x < 314 && vertic < 0)
 						vertic=0;
-					b=new Vector3(horiz/2F,vertic/2.5F,0);
-					offset=tr.position+tr.InverseTransformDirection(b)-posPast;
+					b = new Vector3(horiz / 2F, vertic / 2.5F, 0);
+					offset = tr.position + tr.InverseTransformDirection(b) - posPast;
 					tr.Translate(b);
 							
 					/*else 
@@ -97,20 +104,20 @@ public class CameraHell : MonoBehaviour {
 								tr.LookAt(target);tr.Translate(new Vector3(0,0,(tr.position-target.position).magnitude-distance)*sizeFactor);}*/
 					/*if((tr.position+NewMovement-target.position).sqrMagnitude<=41.1F)
 					{	tr.Translate(NewMovement);tr.LookAt(target);}*/
-					}
-				/*Debug.Log((tr.position+NewMovement-target.position).sqrMagnitude);*/}}
-		else
-		{	
-			/*tr.position=sceneCam.position;
-			tr.rotation=sceneCam.rotation*/;}
-		
+                }
+				// Debug.Log((tr.position+NewMovement-target.position).sqrMagnitude);
+            }
+        } else {	
+			// tr.position=sceneCam.position;
+			// tr.rotation=sceneCam.rotation;
+        }
 	}
 	
-	void Update(){ 
-		horiz=Input.GetAxis("Horizontal2");vertic=Input.GetAxis("Vertical2");
+	void Update ()
+    { 
+		horiz = Input.GetAxis("Horizontal2");
+        vertic = Input.GetAxis("Vertical2");
 	}
-	
-	
 }
 
 
