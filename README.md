@@ -2,7 +2,7 @@
 ArtRPG of the mental kind. Explore the etcverse walking through curves in space.
 
 # Status
-Built using Unity 2018.1.3f1. Open sourcing it for any possible interest. 
+Built using Unity 2018.1.5f1. Open sourcing it for any possible interest. 
 
 Right now there is only the code (and some configuration) available. 
 
