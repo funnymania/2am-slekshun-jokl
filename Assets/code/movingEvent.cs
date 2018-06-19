@@ -12,13 +12,13 @@ public class movingEvent : MonoBehaviour {
 		tr=transform;
 	}
 
-	public void leaveRemains(){
-		placeMe.position=tr.position;
-		placeMe.rotation=tr.rotation;
-		remains.sprite=myRenderer.sprite;
+	public void leaveRemains () {
+		placeMe.position = tr.position;
+		placeMe.rotation = tr.rotation;
+		remains.sprite = myRenderer.sprite;
 	}
 
-	public void clearRemains(){
-		remains.sprite=clear;
+	public void clearRemains () {
+		remains.sprite = clear;
 	}
 }

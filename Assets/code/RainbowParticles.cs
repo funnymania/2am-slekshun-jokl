@@ -16,16 +16,19 @@ public class RainbowParticles : MonoBehaviour {
 	}
 
 	void Update () {
-		ParticleSystem.Particle[] ParticleList = new ParticleSystem.Particle[ps.particleCount];
+        ParticleSystem.Particle[] ParticleList = new ParticleSystem.Particle[ps.particleCount];
 		ps.GetParticles(ParticleList);
-		for (i = 0; i < ParticleList.Length; i++) {
+		for (i = 0; i < ParticleList.Length; i++) 
+        {
 			bleh = ParticleList[i].color;
-			for (j = 0; j < yada; j++) {
+			for (j = 0; j < yada; j++) 
+            {
 				blah = ParticleList[j].color;
 				if (bleh == blah)
 					break;
             }
-			if (j == yada || bleh == Color.white) {
+			if (j == yada || bleh == Color.white) 
+            {
 				ParticleList[i].color = new Color(Random.Range(0.3F, 1), Random.Range(0.3F, 1), Random.Range(0.3F, 1));
             }
 		}

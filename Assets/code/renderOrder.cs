@@ -5,11 +5,12 @@ using System.Collections;
 public class renderOrder : MonoBehaviour {
 	public int order;
 	Renderer thisUn;
-	void Start(){
+	
+    void Start () {
 	}
 	
-	void Update(){
-		thisUn=GetComponent<Renderer>();
-		thisUn.sharedMaterial.renderQueue=order+3000;
+	void Update () {
+		thisUn = GetComponent<Renderer>();
+		thisUn.sharedMaterial.renderQueue = order + 3000;
 	}
 }
